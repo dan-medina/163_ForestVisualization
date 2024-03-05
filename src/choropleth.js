@@ -2,26 +2,26 @@ const width = 960;
 const height = 1000;
 
 const svg = d3.select("#map-container")
-  .attr("width", width)
-  .attr("height", height)
+    .attr("width", width)
+    .attr("height", height)
 
 const projection = d3.geoMercator()
-  .scale(150)
-  .translate([width / 2, height / 1.5]);
+    .scale(150)
+    .translate([width / 2, height / 1.5]);
 
 const path = d3.geoPath().projection(projection);
 
 d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson").then(function(data) {
-  svg.append("g")
-    .selectAll("path")
-    .data(data.features)
-    .join("path")
-    .attr("d", path)
-    .attr("fill", "#004236")
-    .style("stroke", "white")
-    .attr("stroke-width", 0.1)
-    .on("click", zoomIn)
-    .on("dblclick", zoomOut);
+    svg.append("g")
+        .selectAll("path")
+        .data(data.features)
+        .join("path")
+        .attr("d", path)
+        .attr("fill", "#004236")
+        .style("stroke", "white")
+        .attr("stroke-width", 0.1)
+        .on("click", zoomIn)
+        .on("dblclick", zoomOut);
 });
 
 function zoomIn(event, country) {
@@ -37,8 +37,8 @@ function zoomIn(event, country) {
     svg.transition()
         .duration(750)
         .call(
-        zoom.transform,
-        d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+            zoom.transform,
+            d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
         );
 }
 
@@ -55,8 +55,8 @@ function zoomOut(event) {
 }
 
 const zoom = d3.zoom()
-  .scaleExtent([1, 8])
-  .on("zoom", function (event) {
-    svg.selectAll("path").attr("transform", event.transform);
-  });
+    .scaleExtent([1, 8])
+    .on("zoom", function (event) {
+        svg.selectAll("path").attr("transform", event.transform);
+    });
 svg.call(zoom);
