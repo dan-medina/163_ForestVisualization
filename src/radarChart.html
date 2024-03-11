@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Radar Chart</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="radarChart.js"></script>
+    <style>
+        .dropdown-container {
+            display: flex;
+            flex-direction: column;
+            width: 500px;
+            margin-bottom: 20px;
+        }
+
+        .dropdown-container select {
+            margin-bottom: 1px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="radarChart"></div>
+    <div class="dropdown-container">
+        <select id="countrySelector"></select>
+        <select id="yearSelector"></select>
+        <select id="Stat1"></select>
+        <select id="Stat2"></select>
+        <select id="Stat3"></select>
+        <select id="Stat4"></select>
+        <select id="Stat5"></select>
+    </div>
+    <div id="dataDisplay"></div>
+</body>
+
+</html>
