@@ -14,6 +14,8 @@ const path = d3.geoPath().projection(projection);
 
 let data = new Map()
 
+// Code for tooltip adapted from: (https://d3-graph-gallery.com/graph/bubblemap_tooltip.html)
+// and (https://d3-graph-gallery.com/graph/interactivity_tooltip.html) (3/11/24).
 var tooltip = d3.select("#map-container")
     .append("div")
     .attr("class", "tooltip")
@@ -43,6 +45,7 @@ var mouseleave = function(event, d) {
         .style("opacity", 0)
 }
 
+// Code for choropleth map adapted from: (https://d3-graph-gallery.com/graph/choropleth_hover_effect.html) (3/11/24).
 Promise.all([
     d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"),
     d3.csv("../data/esgdata_list.csv")
@@ -50,6 +53,7 @@ Promise.all([
     let mapData = loadData[0];
     let countryData = loadData[1];
 
+    // Temporarily hard-coded year.
     let year = "2020";
     let series = "AG.LND.FRST.ZS";
 
@@ -84,6 +88,7 @@ Promise.all([
 
 });
 
+// Zoom in functionality adapted from: (https://gist.github.com/iamkevinv/0a24e9126cd2fa6b283c6f2d774b69a2) (3/11/24).
 function zoomIn(event, country) {
     console.log("ZOOM IN CALLED")
     // console.log("COUNTRY: ", country);
