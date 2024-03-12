@@ -185,7 +185,7 @@ mapSvg.call(zoom);
 // RADAR CHART
 //
 //
-d3.csv("esgdata_list.csv").then(function (r_data) {
+d3.csv("../data/esgdata_list.csv").then(function (r_data) {
     // Populate country selector
     const uniqueCountries = Array.from(new Set(r_data.map(d => d["Country Name"])));
     const countrySelector = document.getElementById('countrySelector');
