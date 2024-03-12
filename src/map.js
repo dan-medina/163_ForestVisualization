@@ -9,6 +9,11 @@ var mapSvg = d3.select("#map-container")
     .attr("width", width)
     .attr("height", height)
 
+var buttonSvg = d3.select("#buttons")
+    .append("svg")
+    .attr("width",1400)
+    .attr("height",400)
+
 const projection = d3.geoMercator()
     .scale(150)
     .translate([width / 2, height / 1.5]);
@@ -52,6 +57,8 @@ var mouseleave = function(event, d) {
 
 function updateData(year){
     d3.csv("../data/esgdata_list.csv").then(function(loadData){
+        console.log(year)
+        year = year.toString();
         countries = loadData;
         
 
@@ -437,7 +444,7 @@ function triggerRadarChartUpdate(year) {
     document.dispatchEvent(event);
 }
 // RADAR CHART
-
+/*
 d3.selectAll(".timeline").on("click", function() {
     var buttonText = d3.select(this).text();
     globalYear = buttonText;
@@ -445,3 +452,36 @@ d3.selectAll(".timeline").on("click", function() {
     updateData(buttonText);
     triggerRadarChartUpdate(buttonText);
 });
+*/
+
+
+const scale = d3.scaleLinear()
+      .domain([1992, 2020])
+      .range([10, width - 10]);
+
+//Re-purposed old buttons into timeline
+
+buttonSvg.append("g")
+    .attr("transform", "translate(0, 40)") // Adjust the y-coordinate as needed
+    .call(d3.axisBottom(scale).ticks(28).tickFormat(d3.format("d")))
+    .selectAll("text")
+        .on("click",function(d){
+            //updateData(d.target.__data__);
+
+            var buttonText = d3.select(this).text()
+            globalYear = buttonText;
+            updateData(buttonText);
+            triggerRadarChartUpdate(buttonText);
+
+            
+        })
+        .on("mouseover",function(d){
+            d3.select(this).attr("fill", "blue");
+            d3.select(this).attr("cursor", "pointer");
+        })
+        .on("mouseout",function(d){
+            d3.select(this).attr("fill", "black");
+            d3.select(this).attr("cursor", "default");
+        })
+
+
