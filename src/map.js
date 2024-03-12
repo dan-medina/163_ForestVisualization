@@ -15,6 +15,8 @@ const projection = d3.geoMercator()
 
 const path = d3.geoPath().projection(projection);
 
+let rawCountryData = [];
+
 let data = new Map()
 
 // Code for tooltip adapted from: (https://d3-graph-gallery.com/graph/bubblemap_tooltip.html)
@@ -72,13 +74,15 @@ function updateData(year){
              .range(["white", "darkgreen"])
 
         mapSvg.selectAll("path")
-            .attr("fill", function(d) {
-                d.total = data.get(d.id) || 0;
-                return colorScale(d.total);
-            })
-            .on("mouseover", mouseover)
-            .on("mousemove", mousemove)
-            .on("mouseleave", mouseleave);
+          .transition()
+          .duration(500)
+          .attr("fill", function(d) {
+              d.total = data.get(d.id) || 0;
+              return colorScale(d.total);
+          })
+          .on("mouseover", mouseover)
+          .on("mousemove", mousemove)
+          .on("mouseleave", mouseleave);
 
 })}
 
@@ -89,6 +93,8 @@ Promise.all([
 ]).then(function(loadData) {
     let mapData = loadData[0];
     let countryData = loadData[1];
+
+    rawCountryData = countryData;
     // Temporarily hard-coded year.
     let year = "2020";
     let series = "AG.LND.FRST.ZS";
@@ -124,10 +130,20 @@ Promise.all([
 
 });
 
+function getCountryName(countryCode){
+  let countries = rawCountryData.filter(d => {
+    return (d["Country Code"] == countryCode)
+  })
+
+  return countries[0]["Country Name"];
+
+}
+
 // Zoom in functionality adapted from: (https://gist.github.com/iamkevinv/0a24e9126cd2fa6b283c6f2d774b69a2) (3/11/24).
 function zoomIn(event, country) {
-    globalCountry = country.properties.name;
-    console.log("ZOOM IN CALLED")
+    
+    globalCountry = getCountryName(country.id)
+
     // console.log("COUNTRY: ", country);
     const bounds = path.bounds(country);
     const countryWidth = bounds[1][0] - bounds[0][0];
@@ -181,7 +197,7 @@ const zoom = d3.zoom()
         mapSvg.selectAll("path").attr("transform", event.transform);
     });
 mapSvg.call(zoom);
-
+//--------------------------------------------------------------------------------------------------
 // RADAR CHART
 //
 //
@@ -359,9 +375,9 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
       const radarArea = svg.append("path")
         .datum(data)
         .attr("d", radarLine)
-        .attr("fill", "steelblue")
+        .attr("fill", "darkgreen")
         .attr("fill-opacity", 0.1)
-        .attr("stroke", "steelblue")
+        .attr("stroke", "darkgreen")
         .attr("stroke-width", 2);
   
       // Optional: Add circles for data points
@@ -370,7 +386,7 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
           .attr("cx", rScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2))
           .attr("cy", rScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2))
           .attr("r", 5)
-          .style("fill", "steelblue")
+          .style("fill", "darkgreen")
           .on("mouseover", function (event, b) {
             tooltip.transition()
               .duration(200)
