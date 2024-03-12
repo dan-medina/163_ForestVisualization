@@ -12,7 +12,7 @@ var mapSvg = d3.select("#map-container")
 var buttonSvg = d3.select("#buttons")
     .append("svg")
     .attr("width",1400)
-    .attr("height",400)
+    .attr("height",200)
 
 const projection = d3.geoMercator()
     .scale(150)
