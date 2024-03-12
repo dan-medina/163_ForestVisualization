@@ -29,12 +29,23 @@ let data = new Map()
 var tooltip = d3.select("#map-container")
     .append("div")
     .attr("class", "tooltip")
-    .style("opacity", 1)
+    .style("opacity", 0)
     .style("background-color", "white")
     .style("border", "solid")
     .style("border-width", "2px")
     .style("border-radius", "5px")
     .style("padding", "5px")
+
+var tooltip2 = d3.select("#buttons")
+    .append("div")
+    .attr("class", "tooltip2")
+    .style("opacity", 0)
+    .style("background-color", "white")
+    .style("border", "solid")
+    .style("border-width", "2px")
+    .style("border-radius", "5px")
+    .style("padding", "5px")
+
 
 var mouseover = function(event, d) {
     tooltip
@@ -79,6 +90,8 @@ function updateData(year){
         let colorScale = d3.scaleLinear()
             .domain(d3.extent(countries, function(d) { return d.Value}))
              .range(["white", "darkgreen"])
+        buttonSvg.selectAll(".currYear")
+            .text("Current year: " + year)
 
         mapSvg.selectAll("path")
           .transition()
@@ -478,10 +491,30 @@ buttonSvg.append("g")
         .on("mouseover",function(d){
             d3.select(this).attr("fill", "blue");
             d3.select(this).attr("cursor", "pointer");
+            tooltip2
+                .style("opacity", 1)
+            
         })
         .on("mouseout",function(d){
             d3.select(this).attr("fill", "black");
             d3.select(this).attr("cursor", "default");
+            tooltip2
+                .style("opacity", 0)
         })
+        .on("mousemove",function(event,d){
+            console.log(event.pageX)
+            tooltip2
+                .html("Environmental facts go here")
+                .style("left", (event.pageX) + 10 + "px")
+                .style("top", (event.pageY) - 50 + "px")
+                .style("position", "absolute")
+        })
+
+buttonSvg.append("g")
+    .attr("transform", "translate(0, 140)")
+    .append("text") // append a text element within the group
+    .text("Current year: 2020")
+    .attr("class","currYear");
+
 
 
