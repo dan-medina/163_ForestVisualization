@@ -127,7 +127,6 @@ Promise.all([
 // Zoom in functionality adapted from: (https://gist.github.com/iamkevinv/0a24e9126cd2fa6b283c6f2d774b69a2) (3/11/24).
 function zoomIn(event, country) {
     globalCountry = country.properties.name;
-    triggerRadarChartUpdate(globalYear);
     console.log("ZOOM IN CALLED")
     // console.log("COUNTRY: ", country);
     const bounds = path.bounds(country);
@@ -156,6 +155,7 @@ function zoomIn(event, country) {
             .style("stroke", "darkgreen")
             .attr("stroke-width", 0.5)
     }
+    triggerRadarChartUpdate(globalYear);
 }
 
 // Zoom out will not work properly if user clicks on ocean.
