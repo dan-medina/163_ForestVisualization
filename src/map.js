@@ -45,6 +45,42 @@ var mouseleave = function(event, d) {
         .style("opacity", 0)
 }
 
+function updateData(year){
+    d3.csv("../data/esgdata_list.csv").then(function(loadData){
+        countries = loadData;
+        
+
+    
+        let series = "AG.LND.FRST.ZS";
+        
+        countries = countries.filter(d => {
+            return (d.Time === year) && (d["Series Code"] === series)
+        });
+
+    
+        countries.forEach(d => {
+            data.set(d["Country Code"], +d.Value)
+        })
+
+        console.log(countries);
+
+        let colorScale = d3.scaleLinear()
+            .domain(d3.extent(countries, function(d) { return d.Value}))
+             .range(["white", "darkgreen"])
+
+        svg.selectAll("path")
+            .attr("fill", function(d) {
+                d.total = data.get(d.id) || 0;
+                return colorScale(d.total);
+            })
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseleave", mouseleave);
+
+    
+    
+})}
+
 // Code for choropleth map adapted from: (https://d3-graph-gallery.com/graph/choropleth_hover_effect.html) (3/11/24).
 Promise.all([
     d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"),
@@ -143,3 +179,9 @@ const zoom = d3.zoom()
         svg.selectAll("path").attr("transform", event.transform);
     });
 svg.call(zoom);
+
+d3.selectAll(".timeline").on("click", function() {
+    var buttonText = d3.select(this).text();
+    console.log(buttonText);
+    updateData(buttonText);
+});
