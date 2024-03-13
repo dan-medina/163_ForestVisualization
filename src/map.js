@@ -149,6 +149,79 @@ Promise.all([
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
 
+
+  // Map gradient legend adapted from (https://www.visualcinnamon.com/2016/05/smooth-color-legend-d3-svg-gradient/) (3/13/24).
+  let defs = mapSvg.append("defs");
+
+  let mapLegend = defs.append("linearGradient")
+    .attr("id", "linear-gradient")
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "100%")
+    .attr("y2", "0%")
+
+  mapLegend.append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", "white")
+
+  mapLegend.append("stop")
+    .attr("offset", "100%")
+    .attr("stop-color", "darkgreen");
+
+  let legendX = 580;
+  let legendY = 600;
+  let legendWidth = 400;
+  let legendHeight = 20;
+
+  mapSvg.append("rect")
+    .attr("x", legendX)
+    .attr("y", legendY)
+    .attr("width", legendWidth)
+    .attr("height", legendHeight)
+    .style("fill", "url(#linear-gradient)")
+    .style("stroke", "gray")
+
+  mapSvg.append("text")
+    .attr("x", legendX + legendWidth / 3)
+    .attr("y", legendY - 5)
+    .text("Forest Area (% of land area)")
+    .style("font-size", "10px")
+  mapSvg.append("text")
+    .attr("x", legendX - 5)
+    .attr("y", legendY + 30)
+    .text("0%")
+    .style("font-size", "10px")
+
+  mapSvg.append("text")
+    .attr("x", legendX + legendWidth / 5)
+    .attr("y", legendY + 30)
+    .text("20%")
+    .style("font-size", "10px")
+
+  mapSvg.append("text")
+    .attr("x", legendX + legendWidth * 2 / 5)
+    .attr("y", legendY + 30)
+    .text("40%")
+    .style("font-size", "10px")
+
+  mapSvg.append("text")
+    .attr("x", legendX + legendWidth * 3 / 5)
+    .attr("y", legendY + 30)
+    .text("60%")
+    .style("font-size", "10px")
+  
+  mapSvg.append("text")
+    .attr("x", legendX + legendWidth * 4 / 5)
+    .attr("y", legendY + 30)
+    .text("80%")
+    .style("font-size", "10px")
+  
+  mapSvg.append("text")
+    .attr("x", legendX - 5 + legendWidth)
+    .attr("y", legendY + 30)
+    .text("100%")
+    .style("font-size", "10px")
+
 });
 
 function getCountryName(countryCode) {
