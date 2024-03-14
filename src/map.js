@@ -406,53 +406,66 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
     const selectedCountry = country;
     const selectedStats = statSelectors.map(id => document.getElementById(id).value);
 
-    const filteredData = r_data.filter(d => d["Country Name"] === selectedCountry && d["Time"] === selectedYear);
-    const radarData = selectedStats.map(stat => {
-      const statData = filteredData.find(d => d["Series Name"] === stat);
-      let value;
+    let testCountry = "Germany";
+    countryList = [];
+    countryList.push(selectedCountry);
+    countryList.push(testCountry);
+    console.log("COUNTRY LIST: ", countryList);
+    let radarDataList = {};
+    countryList.forEach(country => {
+      const filteredData = r_data.filter(d => d["Country Name"] === country && d["Time"] === selectedYear);
+      console.log("FILTERED DATA: ", filteredData);
+      const radarData = selectedStats.map(stat => {
+        const statData = filteredData.find(d => d["Series Name"] === stat);
+        console.log("STAT DATA: ", statData);
+        let value;
 
-      if (stat === "CO2 emissions (metric tons per capita)") {
-        value = statData ? parseFloat(statData.Value) / 47.66 : 0;
-      } else if (stat === "Population density (people per sq. km of land area)") {
-        value = statData ? (Math.log(parseFloat(statData.Value)) - Math.log(1.4)) / (Math.log(18288.6) - Math.log(1.4)) : 0;
-      } else if (stat === "Food production index (2014-2016 = 100)") {
-        value = statData ? (Math.log(parseFloat(statData.Value)) - Math.log(3.08)) / (Math.log(578.71) - Math.log(3.08)) : 0;
-      } else {
-        // Default normalization (assuming value is a percentage)
-        value = statData ? parseFloat(statData.Value) / 100 : 0;
-      }
+        if (stat === "CO2 emissions (metric tons per capita)") {
+          value = statData ? parseFloat(statData.Value) / 47.66 : 0;
+        } else if (stat === "Population density (people per sq. km of land area)") {
+          value = statData ? (Math.log(parseFloat(statData.Value)) - Math.log(1.4)) / (Math.log(18288.6) - Math.log(1.4)) : 0;
+        } else if (stat === "Food production index (2014-2016 = 100)") {
+          value = statData ? (Math.log(parseFloat(statData.Value)) - Math.log(3.08)) / (Math.log(578.71) - Math.log(3.08)) : 0;
+        } else {
+          // Default normalization (assuming value is a percentage)
+          value = statData ? parseFloat(statData.Value) / 100 : 0;
+        }
 
-      // Handle NaN, negative, and zero values
-      let axisLabel = stat;
-      if (isNaN(value)) {
-        value = 0;
-        axisLabel += " (N/A)";
-      } else if (value < 0) {
-        value = Math.abs(value); // Convert to absolute value
-        axisLabel += " (negative)";
-      } else if (value === 0) {
-        axisLabel += " (N/A)";
-      }
+        // Handle NaN, negative, and zero values
+        let axisLabel = stat;
+        if (isNaN(value)) {
+          value = 0;
+          axisLabel += " (N/A)";
+        } else if (value < 0) {
+          value = Math.abs(value); // Convert to absolute value
+          axisLabel += " (negative)";
+        } else if (value === 0) {
+          axisLabel += " (N/A)";
+        }
+        return { axis: axisLabel, value: value };
+      });
 
-      return { axis: axisLabel, value: value };
-    });
-
+      radarDataList[country] = radarData;
+    })
     // Additional check for NaN values - this might be redundant now but kept for safety
-
+    console.log("RADAR DATA LIST: ", radarDataList);
     updateChartTitle(globalCountry);
-    drawRadarChart(radarData);
+    drawRadarChart(radarDataList);
   }
 
   // Function to draw the radar chart
   function drawRadarChart(data) {
     svg.selectAll("*").remove(); // Clear previous chart
     console.log("RADAR DATA: ", data);
-    const rScale = d3.scaleLinear().range([0, radius]).domain([0, 1]);
-    const angleSlice = Math.PI * 2 / data.length;
 
+    let firstDataObject = data[Object.keys(data)[0]];
+
+    const rScale = d3.scaleLinear().range([0, radius]).domain([0, 1]);
+    const angleSlice = Math.PI * 2 / firstDataObject.length;
+    // console.log(data[Object.keys(data)[0]].length)
     // Draw the axes (lines)
     const axis = svg.selectAll(".axis")
-      .data(data)
+      .data(firstDataObject)
       .enter()
       .append("g")
       .attr("class", "axis");
@@ -480,7 +493,7 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
     ticks.forEach(tick => {
       axis.append("text")
         .style("font-size", "10px")
-        .attr("text-anchor", (d, i) => i === 0 || i === data.length / 2 ? "middle" : i < data.length / 2 ? "start" : "end")
+        .attr("text-anchor", (d, i) => i === 0 || i === firstDataObject.length / 2 ? "middle" : i < firstDataObject.length / 2 ? "start" : "end")
         .attr("x", (d, i) => (rScale(tick)) * Math.cos(angleSlice * i - Math.PI / 2))
         .attr("y", (d, i) => (rScale(tick)) * Math.sin(angleSlice * i - Math.PI / 2))
         .text(tick)
@@ -494,8 +507,10 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
       .angle((d, i) => i * angleSlice);
 
     // Create a wrapper for the radar chart area
-    const radarArea = svg.append("path")
-      .datum(data)
+    for(const [country, radarData] of Object.entries(data)) {
+      console.log("FOR RADAR DATA: ", radarData);
+      const radarArea = svg.append("path")
+      .datum(radarData)
       .transition()
       .duration(500)
       .attr("d", radarLine)
@@ -504,31 +519,36 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
       .attr("stroke", "darkgreen")
       .attr("stroke-width", 2);
 
-    // Optional: Add circles for data points
-    data.forEach((d, i) => {
-      svg.append("circle")
-        // .transition()
-        // .duration(100)
-        .attr("cx", rScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2))
-        .attr("cy", rScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2))
-        .attr("r", 5)
-        .style("opacity", 0)
-        .style("fill", "darkgreen")
-        .on("mouseover", function (event, b) {
-          tooltip.transition()
-            .duration(200)
-            .style("opacity", .9);
-          tooltip.html("Value: " + d.value) // Content of the tooltip
-            .style("left", (event.pageX) + "px")
-            .style("top", (event.pageY - 28) + "px");
-        })
-        .on("mouseout", function (d) {
-          tooltip.transition()
-            .duration(500)
-            .style("opacity", 0);
-        });
-    });
-
+      // Optional: Add circles for data points
+      radarData.forEach((d, i) => {
+        svg.append("circle")
+          // console.log("D: ", d.value)
+          // console.log("I: ", i)
+          // console.log("RSCALE: ", rScale(d.value))
+          // console.log("ANGLE SLICE: ", angleSlice)
+          // .transition()
+          // .duration(100)
+          .attr("cx", rScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2))
+          .attr("cy", rScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2))
+          .attr("r", 5)
+          .style("opacity", 0)
+          .style("fill", "darkgreen")
+          .on("mouseover", function (event, b) {
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+            tooltip.html("Value: " + d.value) // Content of the tooltip
+              .style("left", (event.pageX) + "px")
+              .style("top", (event.pageY - 28) + "px");
+          })
+          .on("mouseout", function (d) {
+            tooltip.transition()
+              .duration(500)
+              .style("opacity", 0);
+          });
+      });
+    }
+    
     svg.selectAll("circle")
       .transition()
       .duration(100)
