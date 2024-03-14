@@ -17,6 +17,7 @@ var buttonSvg = d3.select("#buttons")
   .append("svg")
   .attr("width", 1400)
   .attr("height", 200)
+  
 
 const projection = d3.geoMercator()
   .scale(150)
@@ -376,7 +377,10 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
-      .attr("transform", `translate(${width / 2 + margin.left},${height / 2 + margin.top})`);
+      .attr("transform", `translate(${width / 2 + margin.left},${height / 2 + margin.top})`)
+      
+
+
 
   const countryNameText = svg.append("text")
     .attr("class", "countryName") // Add a class for potential styling
@@ -384,6 +388,15 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
     .attr("text-anchor", "middle") // Center the text
     .style("font-size", "16px") // Style as needed
     .text(globalCountry);
+
+d3.select("#radarChart").select("svg").append("text")
+.attr("class", "currYear") // Use for selection and potential styling
+.attr("x", width/2 + 300) // Center the title
+.attr("y", 60) // Position it at the top of the chart
+.attr("text-anchor", "middle") // Ensure it's centered
+.style("font-size", "18px") // Style as needed
+.text("Current year: 1992"); // Set the text to the current country
+
 
   function updateChartTitle(country) {
     const svg = d3.select("#radarChart").select("svg");
@@ -586,7 +599,7 @@ const scale = d3.scaleLinear()
 //Re-purposed old buttons into timeline
 
 buttonSvg.append("g")
-  .attr("transform", "translate(0, 40)") // Adjust the y-coordinate as needed
+  .attr("transform", "translate(0, 0)") // Adjust the y-coordinate as needed
   .call(d3.axisBottom(scale).ticks(28).tickFormat(d3.format("d")))
   .selectAll("text")
   .on("click", function (d) {
@@ -602,8 +615,16 @@ buttonSvg.append("g")
   .on("mouseover", function (d) {
     d3.select(this).attr("fill", "blue");
     d3.select(this).attr("cursor", "pointer");
-    tooltip2
-      .style("opacity", 1)
+    if (facts[d3.select(this).text()] === undefined){
+        tooltip2
+        .style("opacity", 0)
+        
+    }
+    else{
+        tooltip2
+        .style("opacity", 1)
+
+    }
 
   })
   .on("mouseout", function (d) {
@@ -615,14 +636,18 @@ buttonSvg.append("g")
   .on("mousemove", function (event, d) {
     console.log(event.pageX)
     tooltip2
-      .html("Environmental facts go here")
+      .html(facts[d3.select(this).text()].replace(/\n/g,'<br>'))
       .style("left", (event.pageX) + 10 + "px")
       .style("top", (event.pageY) - 50 + "px")
       .style("position", "absolute")
   })
 
-buttonSvg.append("g")
-  .attr("transform", "translate(0, 140)")
-  .append("text") // append a text element within the group
-  .text("Current year: 2020")
-  .attr("class", "currYear");
+
+
+const facts = {
+    "1995": "- The Brazilian government grants forest land to ~150,000 families in the Amazon from 1995 - 1998. \n- Poor farmers encouraged by the INCRA to farm unclaimed forest land, which nearly 50% of deforestation in Brazil that year is caused by.",
+    "2017": "- Brazil allocates 46,000 sq miles (120,000 km2) for Amazon deforestation to lure foreign mining investors.",
+    "2003": "- In 2003, over 20% of the forests of Mato Grosso, Brazil turned into cropland for soy and various other crops.",
+    "2004": "- Amazonian Deforestation rates peaked in 2004 at 27,423 square kilometers per year. \n- Most of the deforested land from 2001 - 2004 was being used for cattle ranching and growing crops.",
+    "2019": "- Huge wildfires occur all throughout the Amazon Rainforest, causing deforestation rates of this year to bump up quite a lot."
+};
