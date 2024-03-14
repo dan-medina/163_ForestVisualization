@@ -1,10 +1,14 @@
-const width = 1000;
-const height = 650;
+const width = 900;
+const height = 800;
 
-var globalYear = 2020;
+var globalYear = 1992;
 var globalCountry = "Afghanistan";
 
 var mapSvg = d3.select("#map-container")
+  .style("border-radius", "50%")
+  .attr("width", "50%")
+  .style("overflow", "hidden")
+  .style("border", "2px solid darkgreen")
   .append("svg")
   .attr("width", width)
   .attr("height", height)
@@ -117,7 +121,7 @@ Promise.all([
 
   rawCountryData = countryData;
   // Temporarily hard-coded year.
-  let year = "2020";
+  let year = "1992";
   let series = "AG.LND.FRST.ZS";
 
   countryData = countryData.filter(d => {
@@ -145,9 +149,17 @@ Promise.all([
     .attr("stroke-width", 0.1)
     .on("click", zoomIn)
     .on("dblclick", zoomOut)
+    // .on("keypress", function(event) {
+    //   if (event.key === " "){
+    //     console.log("SHIFT KEY PRESSED")
+    //     zoomOut(event);
+    //   }
+    // })
+  
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
+
 
 
   // Map gradient legend adapted from (https://www.visualcinnamon.com/2016/05/smooth-color-legend-d3-svg-gradient/) (3/13/24).
@@ -168,8 +180,8 @@ Promise.all([
     .attr("offset", "100%")
     .attr("stop-color", "darkgreen");
 
-  let legendX = 580;
-  let legendY = 600;
+  let legendX = 225;
+  let legendY = 710;
   let legendWidth = 400;
   let legendHeight = 20;
 
@@ -237,14 +249,14 @@ function getCountryName(countryCode) {
 function zoomIn(event, country) {
 
   globalCountry = getCountryName(country.id)
-
+  console.log("ZOOM IN CALLED")
   // console.log("COUNTRY: ", country);
   const bounds = path.bounds(country);
   const countryWidth = bounds[1][0] - bounds[0][0];
   const countryHeight = bounds[1][1] - bounds[0][1];
   const countryCenterX = (bounds[0][0] + bounds[1][0]) / 2;
   const countryCenterY = (bounds[0][1] + bounds[1][1]) / 2;
-  const scale = Math.max(1, Math.min(15, 0.9 / Math.max(countryWidth / width, countryHeight / height)));
+  const scale = Math.max(1, Math.min(15, 0.7 / Math.max(countryWidth / width, countryHeight / height)));
   const translate = [width / 2 - scale * countryCenterX, height / 2 - scale * countryCenterY];
 
   mapSvg.transition()
@@ -255,7 +267,7 @@ function zoomIn(event, country) {
     );
 
   if (d3.select(this).style("stroke") !== "rgb(0, 100, 0)") {
-    d3.selectAll("path")
+    mapSvg.selectAll("path")
       .style("stroke", "gray")
       .attr("stroke-width", 0.1)
     d3.select(this)
@@ -278,7 +290,7 @@ function zoomOut(event) {
       zoom.transform,
       d3.zoomIdentity
     );
-  d3.selectAll("path")
+  mapSvg.selectAll("path")
     .transition()
     .duration(300)
     .style("stroke", "gray")
@@ -358,14 +370,15 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
     .style("pointer-events", "none");
 
   // Initialize SVG for radar chart
-  const width = 700, height = 700;
+  const width = 700, height = 760;
   const margin = { top: 50, right: 100, bottom: 0, left: 100 };
   const radius = Math.min(width / 2, height / 2) - Math.max(...Object.values(margin));
-  const svg = d3.select("#radarChart").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${width / 2 + margin.left},${height / 2 + margin.top})`);
+  const svg = d3.select("#radarChart")
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${width / 2 + margin.left},${height / 2 + margin.top})`);
 
   const countryNameText = svg.append("text")
     .attr("class", "countryName") // Add a class for potential styling
@@ -485,6 +498,8 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
     // Create a wrapper for the radar chart area
     const radarArea = svg.append("path")
       .datum(data)
+      // .transition()
+      // .duration(500)
       .attr("d", radarLine)
       .attr("fill", "darkgreen")
       .attr("fill-opacity", 0.1)
@@ -497,6 +512,8 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
         .attr("cx", rScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2))
         .attr("cy", rScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2))
         .attr("r", 5)
+        // .transition()
+        // .duration(100)
         .style("fill", "darkgreen")
         .on("mouseover", function (event, b) {
           tooltip.transition()
