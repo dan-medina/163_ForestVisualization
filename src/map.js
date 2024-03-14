@@ -57,7 +57,7 @@ var mouseover = function (event, d) {
 }
 
 var mousemove = function (event, d) {
-  console.log(d.properties.name, d.total)
+  // console.log(d.properties.name, d.total)
   tooltip
     .html(d.properties.name + "<br>" + "Forest Area: " + Math.round(d.total * 100) / 100 + "%")
     .style("left", (event.pageX) + 10 + "px")
@@ -148,19 +148,17 @@ Promise.all([
     .style("stroke", "gray")
     .attr("stroke-width", 0.1)
     .on("click", zoomIn)
-    .on("dblclick", zoomOut)
-    // .on("keypress", function(event) {
-    //   if (event.key === " "){
-    //     console.log("SHIFT KEY PRESSED")
-    //     zoomOut(event);
-    //   }
-    // })
-  
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
     .on("mouseleave", mouseleave);
 
-
+  d3.select(window)
+    .on("keydown", function(event) {
+      if (event.key === "Escape"){
+        console.log("Z KEY PRESSED")
+        zoomOut(event);
+      }
+    })
 
   // Map gradient legend adapted from (https://www.visualcinnamon.com/2016/05/smooth-color-legend-d3-svg-gradient/) (3/13/24).
   let defs = mapSvg.append("defs");
@@ -309,10 +307,10 @@ mapSvg.call(zoom);
 //
 d3.csv("../data/esgdata_list.csv").then(function (r_data) {
   // Populate country selector
-  const uniqueCountries = Array.from(new Set(r_data.map(d => d["Country Name"])));
-  uniqueCountries.forEach(country => {
-    let option = new Option(country, country);
-  });
+  // const uniqueCountries = Array.from(new Set(r_data.map(d => d["Country Name"])));
+  // uniqueCountries.forEach(country => {
+  //   let option = new Option(country, country);
+  // });
 
   // Populate statistics selectors
   const stats = Array.from(new Set(r_data.map(d => d["Series Name"])));
@@ -448,7 +446,7 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
   // Function to draw the radar chart
   function drawRadarChart(data) {
     svg.selectAll("*").remove(); // Clear previous chart
-
+    console.log("RADAR DATA: ", data);
     const rScale = d3.scaleLinear().range([0, radius]).domain([0, 1]);
     const angleSlice = Math.PI * 2 / data.length;
 
@@ -498,8 +496,8 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
     // Create a wrapper for the radar chart area
     const radarArea = svg.append("path")
       .datum(data)
-      // .transition()
-      // .duration(500)
+      .transition()
+      .duration(500)
       .attr("d", radarLine)
       .attr("fill", "darkgreen")
       .attr("fill-opacity", 0.1)
@@ -509,11 +507,12 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
     // Optional: Add circles for data points
     data.forEach((d, i) => {
       svg.append("circle")
+        // .transition()
+        // .duration(100)
         .attr("cx", rScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2))
         .attr("cy", rScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2))
         .attr("r", 5)
-        // .transition()
-        // .duration(100)
+        .style("opacity", 0)
         .style("fill", "darkgreen")
         .on("mouseover", function (event, b) {
           tooltip.transition()
@@ -529,6 +528,11 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
             .style("opacity", 0);
         });
     });
+
+    svg.selectAll("circle")
+      .transition()
+      .duration(100)
+      .style("opacity", 1)
   }
 
   document.addEventListener('updateRadarChartEvent', function (e) {
