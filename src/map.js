@@ -15,6 +15,7 @@ var mapSvg = d3.select("#map-container")
   .append("svg")
   .attr("width", width)
   .attr("height", height)
+  .style("background-color", "#c5e0f5");
 
 var buttonSvg = d3.select("#buttons")
   .append("svg")
