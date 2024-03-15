@@ -566,7 +566,7 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
       .radius(d => rScale(d.value))
       .angle((d, i) => i * angleSlice);
 
-    let radarColors = ["greenyellow", "olive", "darkgreen"]
+    let radarColors = ["darkseagreen", "olive", "darkgreen"]
     // Create a wrapper for the radar chart area
     svg.selectAll(".radar-legend").remove()
 
