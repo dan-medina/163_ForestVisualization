@@ -22,8 +22,7 @@ var buttonSvg = d3.select("#buttons")
   .attr("width", width2)
   .attr("height", height2)
   .attr("class","timeline1")
-  
-  
+
 
 const projection = d3.geoMercator()
   .scale(150)
@@ -67,7 +66,6 @@ var mouseover = function (event, d) {
 }
 
 var mousemove = function (event, d) {
-  // console.log(d.properties.name, d.total)
   tooltip
     .html(d.properties.name + "<br>" + "Forest Area: " + Math.round(d.total * 100) / 100 + "%")
     .style("left", (event.pageX) + 10 + "px")
@@ -82,7 +80,6 @@ var mouseleave = function (event, d) {
 
 function updateData(year) {
   d3.csv("../data/esgdata_list.csv").then(function (loadData) {
-    console.log(year)
     year = year.toString();
     countries = loadData;
 
@@ -99,13 +96,12 @@ function updateData(year) {
       data.set(d["Country Code"], +d.Value)
     })
 
-    console.log(countries);
-
     let colorScale = d3.scaleLinear()
       .domain(d3.extent(countries, function (d) { return d.Value }))
       .range(["white", "darkgreen"])
     d3.select("#radarChart").select("svg").selectAll(".currYear")
       .text("Current year: " + year)
+
 
     mapSvg.selectAll("path")
       .transition()
@@ -165,7 +161,6 @@ Promise.all([
   d3.select(window)
     .on("keydown", function(event) {
       if (event.key === "Escape" || event.key === "p"){
-        console.log("Z KEY PRESSED")
         zoomOut(event);
       }
     })
@@ -266,9 +261,7 @@ function zoomIn(event, country) {
       selectedCountries.push(countryName)
     }
   }
-  // globalCountry = getCountryName(country.id)
-  console.log("ZOOM IN CALLED")
-  // console.log("COUNTRY: ", country);
+
   const bounds = path.bounds(country);
   const countryWidth = bounds[1][0] - bounds[0][0];
   const countryHeight = bounds[1][1] - bounds[0][1];
@@ -300,7 +293,6 @@ function zoomIn(event, country) {
 
 function zoomOut(event) {
   event.stopPropagation();
-  console.log("ZOOM OUT CALLED");
   mapSvg.transition()
     .duration(750)
     .call(
@@ -396,9 +388,6 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", `translate(${width / 2 + margin.left},${height / 2 + margin.top})`)
-      
-
-
 
   const countryNameText = svg.append("text")
     .attr("class", "countryName") // Add a class for potential styling
@@ -459,24 +448,15 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
 
   // Function to update and redraw the radar chart
   function updateRadarChart(num, countries) {
-    console.log("UPDATE RADAR CHART CALLED");
-    console.log("UPDATE YEAR: ", num)
+
     const selectedYear = num;
-    // const selectedCountry = country;
     const selectedStats = statSelectors.map(id => document.getElementById(id).value);
 
-    // let testCountry = "Germany";
-    // countryList = [];
-    // countryList.push(selectedCountry);
-    // countryList.push(testCountry);
-    console.log("COUNTRY LIST: ", countries);
     let radarDataList = {};
     countries.forEach(country => {
       const filteredData = r_data.filter(d => d["Country Name"] === country && d["Time"] === selectedYear);
-      console.log("FILTERED DATA: ", filteredData);
       const radarData = selectedStats.map(stat => {
         const statData = filteredData.find(d => d["Series Name"] === stat);
-        console.log("STAT DATA: ", statData);
         let value;
 
         if (stat === "CO2 emissions (metric tons per capita)") {
@@ -507,7 +487,6 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
       radarDataList[country] = radarData;
     })
     // Additional check for NaN values - this might be redundant now but kept for safety
-    console.log("RADAR DATA LIST: ", radarDataList);
     updateChartTitle();
     drawRadarChart(radarDataList);
   }
@@ -515,13 +494,12 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
   // Function to draw the radar chart
   function drawRadarChart(data) {
     svg.selectAll("*").remove(); // Clear previous chart
-    console.log("RADAR DATA: ", data);
 
     let firstDataObject = data[Object.keys(data)[0]];
 
     const rScale = d3.scaleLinear().range([0, radius]).domain([0, 1]);
     const angleSlice = Math.PI * 2 / firstDataObject.length;
-    // console.log(data[Object.keys(data)[0]].length)
+
     // Draw the axes (lines)
     const axis = svg.selectAll(".axis")
       .data(firstDataObject)
@@ -570,7 +548,6 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
     svg.selectAll(".radar-legend").remove()
 
     for(const [country, radarData] of Object.entries(data)) {
-      console.log("FOR RADAR DATA: ", radarData);
       let radarColor = radarColors[selectedCountries.indexOf(country)]
       const radarArea = svg.append("path")
       .datum(radarData)
@@ -582,15 +559,8 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
       .attr("stroke", radarColor)
       .attr("stroke-width", 2);
 
-      // Optional: Add circles for data points
       radarData.forEach((d, i) => {
         svg.append("circle")
-          // console.log("D: ", d.value)
-          // console.log("I: ", i)
-          // console.log("RSCALE: ", rScale(d.value))
-          // console.log("ANGLE SLICE: ", angleSlice)
-          // .transition()
-          // .duration(100)
           .attr("cx", rScale(d.value) * Math.cos(angleSlice * i - Math.PI / 2))
           .attr("cy", rScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2))
           .attr("r", 5)
@@ -646,20 +616,11 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
 });
 
 function triggerRadarChartUpdate(year) {
-  console.log("YEAR: ", year)
   var event = new CustomEvent('updateRadarChartEvent', { detail: { year: year, countries: selectedCountries } });
   document.dispatchEvent(event);
 }
 
-/*
-d3.selectAll(".timeline").on("click", function() {
-    var buttonText = d3.select(this).text();
-    globalYear = buttonText;
-    console.log(buttonText);
-    updateData(buttonText);
-    triggerRadarChartUpdate(buttonText);
-});
-*/
+
 const containerWidth = document.querySelector(".timeline1").clientWidth;
 
 const scale = d3.scaleLinear()
@@ -706,7 +667,6 @@ buttonSvg.append("g")
       .style("opacity", 0)
   })
   .on("mousemove", function (event, d) {
-    console.log(event.pageX)
     tooltip2
       .html(facts[d3.select(this).text()].replace(/\n/g,'<br>'))
       .style("font-size","12px")
