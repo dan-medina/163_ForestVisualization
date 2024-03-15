@@ -719,9 +719,16 @@ buttonSvg.append("g")
 
 
 const facts = {
-    "1995": "- The Brazilian government grants forest land to ~150,000 families in the Amazon from 1995 - 1998. \n- Poor farmers encouraged by the INCRA to farm unclaimed forest land, which nearly 50% of deforestation in Brazil that year is caused by.",
+    "1995": "- The Brazilian government grants forest land to ~150,000 families in the Amazon from 1995 - 1998. \n- Poor farmers encouraged by the INCRA to farm and industrialize unclaimed forest land, which nearly 50% of deforestation in Brazil that year is caused by.",
     "2017": "- Brazil allocates 46,000 sq miles (120,000 km2) for Amazon deforestation to lure foreign mining investors.",
     "2003": "- In 2003, over 20% of the forests of Mato Grosso, Brazil turned into cropland for soy and various other crops.",
     "2004": "- Amazonian Deforestation rates peaked in 2004 at 27,423 square kilometers per year. \n- Most of the deforested land from 2001 - 2004 was being used for cattle ranching and growing crops.",
-    "2019": "- Huge wildfires occur all throughout the Amazon Rainforest, causing deforestation rates of this year to bump up quite a lot."
+    "2019": "- Huge wildfires occur all throughout the Amazon Rainforest, causing deforestation rates of this year to bump up quite a lot.\n- Most were discovered to be caused by illegal land clearing not natural factors\n - 2019 now ranks among the lowest ice minimums in the 40-year satellite record.",
+    "2012": "- Indonesia's rate of deforestation continued to increase to an estimated 840,000 hectares in 2012, surpassing deforestation in Brazil. \n-Mostly can be attributed to clearing of land for palm-oil and other industrial plantations, as well as agriculture.",
+    "2018": "- More than 80% of deforestation was attributed to agriculture in 2018.",
+    "2011": "- Data reveals that global CO₂ emissions were 150 times higher in 2011 than they were in 1850.",
+    "2020": "- 2020 ranks as the second-hottest year on record for the planet, followed in second by 2016."
+
+
+
 };
