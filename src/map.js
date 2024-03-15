@@ -100,7 +100,7 @@ function updateData(year) {
     let colorScale = d3.scaleLinear()
       .domain(d3.extent(countries, function (d) { return d.Value }))
       .range(["white", "darkgreen"])
-    buttonSvg.selectAll(".currYear")
+    d3.select("#radarChart").select("svg").selectAll(".currYear")
       .text("Current year: " + year)
 
     mapSvg.selectAll("path")
