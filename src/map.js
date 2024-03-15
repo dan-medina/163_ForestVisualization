@@ -1,7 +1,7 @@
 const width = 900;
 const height = 800;
 
-var globalYear = 1992;
+var globalYear = "1992";
 var globalCountry = "Afghanistan";
 
 var mapSvg = d3.select("#map-container")
@@ -26,6 +26,9 @@ const projection = d3.geoMercator()
 const path = d3.geoPath().projection(projection);
 
 let rawCountryData = [];
+
+let selectedCountries = [];
+selectedCountries.push("United States");
 
 let data = new Map()
 
@@ -247,7 +250,17 @@ function getCountryName(countryCode) {
 // Zoom in functionality adapted from: (https://gist.github.com/iamkevinv/0a24e9126cd2fa6b283c6f2d774b69a2) (3/11/24).
 function zoomIn(event, country) {
 
-  globalCountry = getCountryName(country.id)
+  let countryName = getCountryName(country.id);
+
+  if(!selectedCountries.includes(countryName)){
+    if(selectedCountries.length >= 3){
+      selectedCountries.shift()
+      selectedCountries.push(countryName)
+    } else {
+      selectedCountries.push(countryName)
+    }
+  }
+  // globalCountry = getCountryName(country.id)
   console.log("ZOOM IN CALLED")
   // console.log("COUNTRY: ", country);
   const bounds = path.bounds(country);
@@ -387,18 +400,18 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
     .attr("transform", `translate(0, ${-height / 2 + margin.top})`) // Adjust this to position the text
     .attr("text-anchor", "middle") // Center the text
     .style("font-size", "16px") // Style as needed
-    .text(globalCountry);
+    .text(`Selected Country: ${selectedCountries[selectedCountries.length - 1]}`);
 
-d3.select("#radarChart").select("svg").append("text")
-.attr("class", "currYear") // Use for selection and potential styling
-.attr("x", width/2 + 300) // Center the title
-.attr("y", 60) // Position it at the top of the chart
-.attr("text-anchor", "middle") // Ensure it's centered
-.style("font-size", "18px") // Style as needed
-.text("Current year: 1992"); // Set the text to the current country
+  d3.select("#radarChart").select("svg").append("text")
+    .attr("class", "currYear") // Use for selection and potential styling
+    .attr("x", width/2 + 300) // Center the title
+    .attr("y", 60) // Position it at the top of the chart
+    .attr("text-anchor", "middle") // Ensure it's centered
+    .style("font-size", "18px") // Style as needed
+    .text(`Current year: ${globalYear}`); // Set the text to the current country
 
 
-  function updateChartTitle(country) {
+  function updateChartTitle() {
     const svg = d3.select("#radarChart").select("svg");
     // Remove any existing title to prevent duplicates
     svg.select(".radar-chart-title").remove();
@@ -410,22 +423,50 @@ d3.select("#radarChart").select("svg").append("text")
       .attr("y", 60) // Position it at the top of the chart
       .attr("text-anchor", "middle") // Ensure it's centered
       .style("font-size", "24px") // Style as needed
-      .text(country); // Set the text to the current country
+      .text(`Selected Country: ${selectedCountries[selectedCountries.length - 1]}`); // Set the text to the current country
+
+    if (selectedCountries.length > 1){
+      svg.select(".radar-chart-subtitle").remove();
+      svg.append("text")
+      .attr("class", "radar-chart-subtitle")
+      .attr("x", width / 2 + margin.left)
+      .attr("y", 100)
+      .attr("text-anchor", "middle")
+      .style("font-size", "20px")
+      .text(() => {
+        if (selectedCountries.length == 2){
+          return "Recently selected countries: " + selectedCountries[0]
+        }else {
+          return "Recently selected countries: " + selectedCountries[0] + ", " + selectedCountries[1]
+        }
+      })
+    }
+    svg.select(".currYear").remove()
+    svg.append("text")
+      .attr("class", "currYear") // Use for selection and potential styling
+      .attr("x", width/2 + 400) // Center the title
+      .attr("y", 60) // Position it at the top of the chart
+      .attr("text-anchor", "middle") // Ensure it's centered
+      .style("font-size", "18px") // Style as needed
+      .text(`Current year: ${globalYear}`); // Set the text to the current country
+    
   }
 
   // Function to update and redraw the radar chart
-  function updateRadarChart(num, country) {
+  function updateRadarChart(num, countries) {
+    console.log("UPDATE RADAR CHART CALLED");
+    console.log("UPDATE YEAR: ", num)
     const selectedYear = num;
-    const selectedCountry = country;
+    // const selectedCountry = country;
     const selectedStats = statSelectors.map(id => document.getElementById(id).value);
 
-    let testCountry = "Germany";
-    countryList = [];
-    countryList.push(selectedCountry);
-    countryList.push(testCountry);
-    console.log("COUNTRY LIST: ", countryList);
+    // let testCountry = "Germany";
+    // countryList = [];
+    // countryList.push(selectedCountry);
+    // countryList.push(testCountry);
+    console.log("COUNTRY LIST: ", countries);
     let radarDataList = {};
-    countryList.forEach(country => {
+    countries.forEach(country => {
       const filteredData = r_data.filter(d => d["Country Name"] === country && d["Time"] === selectedYear);
       console.log("FILTERED DATA: ", filteredData);
       const radarData = selectedStats.map(stat => {
@@ -462,7 +503,7 @@ d3.select("#radarChart").select("svg").append("text")
     })
     // Additional check for NaN values - this might be redundant now but kept for safety
     console.log("RADAR DATA LIST: ", radarDataList);
-    updateChartTitle(globalCountry);
+    updateChartTitle();
     drawRadarChart(radarDataList);
   }
 
@@ -519,17 +560,21 @@ d3.select("#radarChart").select("svg").append("text")
       .radius(d => rScale(d.value))
       .angle((d, i) => i * angleSlice);
 
+    let radarColors = ["greenyellow", "olive", "darkgreen"]
     // Create a wrapper for the radar chart area
+    svg.selectAll(".radar-legend").remove()
+
     for(const [country, radarData] of Object.entries(data)) {
       console.log("FOR RADAR DATA: ", radarData);
+      let radarColor = radarColors[selectedCountries.indexOf(country)]
       const radarArea = svg.append("path")
       .datum(radarData)
       .transition()
       .duration(500)
       .attr("d", radarLine)
-      .attr("fill", "darkgreen")
+      .attr("fill", radarColor)
       .attr("fill-opacity", 0.1)
-      .attr("stroke", "darkgreen")
+      .attr("stroke", radarColor)
       .attr("stroke-width", 2);
 
       // Optional: Add circles for data points
@@ -545,7 +590,7 @@ d3.select("#radarChart").select("svg").append("text")
           .attr("cy", rScale(d.value) * Math.sin(angleSlice * i - Math.PI / 2))
           .attr("r", 5)
           .style("opacity", 0)
-          .style("fill", "darkgreen")
+          .style("fill", radarColor)
           .on("mouseover", function (event, b) {
             tooltip.transition()
               .duration(200)
@@ -560,6 +605,25 @@ d3.select("#radarChart").select("svg").append("text")
               .style("opacity", 0);
           });
       });
+      
+      svg.append("rect")
+        .transition()
+        .duration(500)
+        .attr("class", "radar-legend")
+        .attr("x", 250)
+        .attr("y", selectedCountries.indexOf(country) * 25)
+        .attr("width", 20)
+        .attr("height", 20)
+        .style("fill", radarColor)
+      svg.append("text")
+        .transition()
+        .duration(500)
+        .attr("class", "radar-legend")
+        .attr("x", 250 + 24)
+        .attr("y", selectedCountries.indexOf(country) * 25 + 12)
+        .text(country)
+        .attr("text-anchor", "left")
+        .style("font-size", "10px")
     }
     
     svg.selectAll("circle")
@@ -570,14 +634,15 @@ d3.select("#radarChart").select("svg").append("text")
 
   document.addEventListener('updateRadarChartEvent', function (e) {
     // Now passing both year and country to updateRadarChart
-    updateRadarChart(e.detail.year, e.detail.country);
+    updateRadarChart(e.detail.year, e.detail.countries);
   });
   // Initial chart update
-  updateRadarChart(globalYear, globalCountry);
+  updateRadarChart(globalYear, selectedCountries);
 });
 
 function triggerRadarChartUpdate(year) {
-  var event = new CustomEvent('updateRadarChartEvent', { detail: { year: year, country: globalCountry } });
+  console.log("YEAR: ", year)
+  var event = new CustomEvent('updateRadarChartEvent', { detail: { year: year, countries: selectedCountries } });
   document.dispatchEvent(event);
 }
 
