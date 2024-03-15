@@ -298,7 +298,6 @@ function zoomIn(event, country) {
   triggerRadarChartUpdate(globalYear);
 }
 
-// Zoom out will not work properly if user clicks on ocean.
 function zoomOut(event) {
   event.stopPropagation();
   console.log("ZOOM OUT CALLED");
@@ -443,7 +442,7 @@ d3.csv("../data/esgdata_list.csv").then(function (r_data) {
         if (selectedCountries.length == 2){
           return "Recently selected countries: " + selectedCountries[0]
         }else {
-          return "Recently selected countries: " + selectedCountries[0] + ", " + selectedCountries[1]
+          return "Recently selected countries: " + selectedCountries[1] + ", " + selectedCountries[0]
         }
       })
     }
