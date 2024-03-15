@@ -1,7 +1,10 @@
 const width = 900;
 const height = 800;
 
-var globalYear = 1992;
+const width2 = 910;
+const height2 = 60;
+
+var globalYear = "1992";
 var globalCountry = "Afghanistan";
 
 var mapSvg = d3.select("#map-container")
@@ -15,8 +18,10 @@ var mapSvg = d3.select("#map-container")
 
 var buttonSvg = d3.select("#buttons")
   .append("svg")
-  .attr("width", 1400)
-  .attr("height", 200)
+  .attr("width", width2)
+  .attr("height", height2)
+  .attr("class","timeline1")
+  
   
 
 const projection = d3.geoMercator()
@@ -155,7 +160,7 @@ Promise.all([
 
   d3.select(window)
     .on("keydown", function(event) {
-      if (event.key === "Escape"){
+      if (event.key === "Escape" || event.key === "p"){
         console.log("Z KEY PRESSED")
         zoomOut(event);
       }
@@ -590,16 +595,18 @@ d3.selectAll(".timeline").on("click", function() {
     triggerRadarChartUpdate(buttonText);
 });
 */
-
+const containerWidth = document.querySelector(".timeline1").clientWidth;
 
 const scale = d3.scaleLinear()
   .domain([1992, 2020])
-  .range([10, width - 10]);
+  .range([10, containerWidth * 0.98]);
+
+
 
 //Re-purposed old buttons into timeline
 
 buttonSvg.append("g")
-  .attr("transform", "translate(0, 0)") // Adjust the y-coordinate as needed
+
   .call(d3.axisBottom(scale).ticks(28).tickFormat(d3.format("d")))
   .selectAll("text")
   .on("click", function (d) {
@@ -637,8 +644,9 @@ buttonSvg.append("g")
     console.log(event.pageX)
     tooltip2
       .html(facts[d3.select(this).text()].replace(/\n/g,'<br>'))
+      .style("font-size","12px")
       .style("left", (event.pageX) + 10 + "px")
-      .style("top", (event.pageY) - 50 + "px")
+      .style("top", (event.pageY) + 20 + "px")
       .style("position", "absolute")
   })
 
